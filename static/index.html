@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1 id="loginNum"></h1>
+    <div class="login">
+        <input id="user" type="text"/>
+        <button id="loginBtn">登录</button>
+    </div>
+    <div class="sendMsg" style="margin-top: 5px;">
+        <textarea id="message" cols="30" rows="10"></textarea>
+        <button id="msgBtn">发送</button>
+    </div>
+    <div class="privateMsg">
+        <textarea id="personMsg" cols="30" rows="10"></textarea>
+        用户ID：<input id="personId" type="text"/>
+        <button id="sendPesonMsg">私聊</button>
+    </div>
+    <div>
+        <ul id="userList">
+        </ul>
+    </div>
+    <div class="msg" id="msg">
+
+    </div>
+    <div class="privateMsg" id="privateMsg">
+
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script>
+        $(function () {
+            var socket  = io.connect();
+            $('#loginBtn').click(function () {
+                var user = new Object();
+                user.nickName = $('#user').val();
+                socket.emit('login',user);
+            });
+            $('#msgBtn').click(function () {
+                var message = $('#message').val();
+                var nickName = $('#user').val();
+                var p = $('<p></p>');
+                p.text(nickName+":"+message);
+                $('#msg').append(p);
+                socket.emit('putMsg',message);
+            })
+            $('#sendPesonMsg').click(function () {
+                var message = $('#personMsg').val();
+                var userId = $('#personId').val();
+                var nickName = $('#user').val();
+                if(userId == ''){
+                    alert('请选择私聊对象!');
+                    return ;
+                }
+                var p = $('<p></p>');
+                p.text(nickName+":"+message);
+                $('#privateMsg').append(p);
+                socket.emit('putPrivateMsg',userId,message);
+            })
+
+            socket.on('loginSuccess',function (user,users,msg) {
+                $('#loginNum').text('当前在线人数:'+users.length);
+                $('#userList').empty();
+                users.forEach(function (value, index) {
+                    var li = $('<li></li>');
+                    li.text(value.nickName);
+                    $('#userList').append(li);
+                })
+                var p = $('<p></p>');
+                p.text("system:"+user.nickName+msg);
+                $('#msg').append(p);
+            });
+            socket.on('system',function (user,users,msg) {
+                $('#loginNum').text('当前在线人数:'+users.length);
+                $('#userList').empty();
+                users.forEach(function (value, index) {
+                    var li = $('<li></li>');
+                    li.text(value.nickName);
+                    $('#userList').append(li);
+                })
+                var p = $('<p></p>');
+                p.text("system:"+user.nickName+msg);
+                $('#msg').append(p);
+            })
+            socket.on('sendMsg',function (user,users,msg) {
+                var p = $('<p></p>');
+                p.text(user.nickName+":"+msg);
+                $('#msg').append(p);
+            })
+            socket.on('sendPrivateMsg',function (user,users,msg) {
+                var p = $('<p></p>');
+                p.text(user.nickName+":"+msg);
+                $('#privateMsg').append(p);
+            })
+        })
+    </script>
+</body>
+</html>
