@@ -15,8 +15,8 @@
 	     self = this;
 	 if(this.so==null)
 	 {
-         this.so = io.connect("http://"+host+":"+p,{'reconnect':false});
-         //this.so = io.connect({'reconnect':false});
+         //this.so = io.connect("http://"+host+":"+p,{'reconnect':false});
+         this.so = io.connect({'reconnect':false});
 		 if(this.so)
 		 {		   
 		   //绑定连接socket事件
